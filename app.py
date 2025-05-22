@@ -125,21 +125,34 @@ def post_reservation():
     except Exception as e:
         return jsonify({"status": "Error", "error": f"{str(e)}"}),400
 
-@app.route("/get/key", methods=["GET"])
+@app.route("/get/key", methods=["POST"])
 def get_key():
     try:
+        data = request.get_json()
+
+        if "property_id" not in data: 
+            return jsonify({"status": "Fetch Failed", "error": "Property ID is required"}), 400
+
         load_dotenv()
         SUPABASE_URL = os.getenv("SUPABASE_URL")
         SUPABASE_KEY = os.getenv("SUPABASE_KEY")
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-        response = supabase.table("Key").select("*").eq("id", 1).execute()
+
+        response = supabase.table("Key").select("*").eq("id", data["property_id"]).execute()
         
-        if not response.data: 
-            return jsonify({"status": "Fetch Failed", "error":"Failed to fetch key"})
-        else: 
-            return jsonify({"status":"Success", "key":response.data[0]["current_key"]})
+        if not response.data:
+            return jsonify({"status": "Fetch Failed", "error": "No matching property ID found"}), 404
+        
+        key_value = response.data[0].get("current_key")  # Adjust field name if different
+
+        return jsonify({
+            "status": "Success",
+            "property_id": data["property_id"],
+            "key": key_value
+        }), 200
+
     except Exception as e:
-        return jsonify({"status": "Error", "error": f"{str(e)}"}),400
+        return jsonify({"status": "Error", "error": str(e)}), 400
 
 @app.route("/list/properties", methods=["GET"])
 def get_properties(): 
