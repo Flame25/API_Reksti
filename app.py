@@ -80,6 +80,51 @@ def signup():
     except Exception as e:
         return jsonify({"status": "Failed", "error": f"{str(e)}"}),500
 
+
+
+@app.route("/reservation", methods=["POST"])
+def post_reservation():
+    try:
+        data = request.get_json()
+        if "user_id" not in data:
+            return jsonify({"status": "Register Failed", "error": "User ID is required"}),400
+        if "start_date" not in data: # Hash password in the back end for security
+            return jsonify({"status": "Register Failed", "error": "Start Date is required"}),400
+        if "end_date" not in data: # Hash password in the back end for security
+            return jsonify({"status": "Register Failed", "error": "End Date is required"}),400
+        if "status" not in data:
+            return jsonify({"status": "Register Failed", "error": "Reservation Status is required"}),400
+
+
+        # Validate date format
+        try:
+            start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
+            end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
+        except ValueError:
+             return jsonify({"status": "Register Failed", "error": "Dates must be in YYYY-MM-DD format"}), 400
+
+        load_dotenv()
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+        data_reservation = {
+            "user_id": data["user_id"], 
+            "start_date": start_date.isoformat(), 
+            "end_date": end_date.isoformat(), 
+            "status": data["status"] 
+        }
+
+        response = supabase.table("Reservation").insert(data_reservation).execute()
+        
+        if response.data:
+            return jsonify({"status": "Success"}, 200)
+        else:
+            return jsonify({"status": "Reservation Failed", "error": "Try again later"}),500
+
+    except Exception as e:
+        return jsonify({"status": "Error", "error": f"{str(e)}"}),400
+
 @app.route("/get/key", methods=["GET"])
 def get_key():
     try:
@@ -96,7 +141,22 @@ def get_key():
     except Exception as e:
         return jsonify({"status": "Error", "error": f"{str(e)}"}),400
 
-       
+@app.route("/list/properties", methods=["GET"])
+def get_properties(): 
+    try:
+        load_dotenv()
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        response = supabase.table("Properties").select("*").execute()
+        
+        if not response.data: 
+            return jsonify({"status": "Fetch Failed", "error":"Failed to fetch key"})
+        else: 
+            return jsonify({"status":"Success", "list":response.data})
+    except Exception as e:
+        return jsonify({"status": "Error", "error": f"{str(e)}"}),400
+
 @app.route("/user/login", methods=["POST"])
 def login():
     try:
