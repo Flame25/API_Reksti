@@ -87,14 +87,15 @@ def post_reservation():
     try:
         data = request.get_json()
         if "user_name" not in data:
-            return jsonify({"status": "Register Failed", "error": "User Name is required"}),400
-        if "start_date" not in data: # Hash password in the back end for security
-            return jsonify({"status": "Register Failed", "error": "Start Date is required"}),400
-        if "end_date" not in data: # Hash password in the back end for security
-            return jsonify({"status": "Register Failed", "error": "End Date is required"}),400
+            return jsonify({"status": "Failed", "error": "User Name is required"}),400
+        if "start_date" not in data:
+            return jsonify({"status": "Failed", "error": "Start Date is required"}),400
+        if "end_date" not in data: 
+            return jsonify({"status": "Failed", "error": "End Date is required"}),400
         if "status" not in data:
-            return jsonify({"status": "Register Failed", "error": "Reservation Status is required"}),400
-
+            return jsonify({"status": "Failed", "error": "Reservation Status is required"}),400
+        if "property_id" not in data:
+            return jsonify({"status": "Failed", "error": "Reservation Status is required"}),400
 
         # Validate date format
         try:
@@ -112,7 +113,8 @@ def post_reservation():
             "user_name": data["user_name"], 
             "start_date": start_date.isoformat(), 
             "end_date": end_date.isoformat(), 
-            "status": data["status"] 
+            "property_id": data["property_id"],
+            "status": data["status"], 
         }
 
         response = supabase.table("Reservation").insert(data_reservation).execute()
