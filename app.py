@@ -80,7 +80,35 @@ def signup():
     except Exception as e:
         return jsonify({"status": "Failed", "error": f"{str(e)}"}),500
 
+@app.route('/list/reservation', methods=['POST'])
+def reservation_user():
+    try:
+        data = request.get_json()
+        print("Incoming JSON:", data)
 
+        if "user_name" not in data:
+            return jsonify({"status": "Failed", "error": "Username is required"}), 400
+
+        load_dotenv()
+        SUPABASE_URL = os.getenv("SUPABASE_URL")
+        SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+        supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+        response = supabase.table("Reservation").select("*").eq("user_name", data["user_name"]).execute()
+        print("Supabase Response:", response.data)
+
+        if response.data:
+            return jsonify({
+                "status": "Success",
+                "reservation_list": response.data,
+            }), 200
+        else: # If empty 
+            return jsonify({"status": "Failed", "error": "No Data Yet"}), 500
+
+    except Exception as e:
+        print("Error:", str(e))
+        return jsonify({"status": "Failed", "error": str(e)}), 500
 
 @app.route("/reservation", methods=["POST"])
 def post_reservation():
