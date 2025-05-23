@@ -39,11 +39,11 @@ def signup():
     try:
         data = request.get_json()
         if "user_name" not in data:
-            return jsonify({"status": "Register Failed", "error": "Username is required"}),400
+            return jsonify({"status": "Failed", "error": "Username is required"}),400
         if "password" not in data: # Hash password in the back end for security
-            return jsonify({"status": "Register Failed", "error": "Password is required"}),400
+            return jsonify({"status": "Failed", "error": "Password is required"}),400
         if "email" not in data: # Hash password in the back end for security
-            return jsonify({"status": "Register Failed", "error": "Password is required"}),400
+            return jsonify({"status": "Failed", "error": "Password is required"}),400
 
         # Check pass and user name in database
 
@@ -57,7 +57,7 @@ def signup():
         response = supabase.table("User").select("*").eq("user_name", data["user_name"]).execute()
 
         if response.data:
-            return jsonify({"status": "Register Failed", "error": "Username found. Please Login!"}),400
+            return jsonify({"status": "Failed", "error": "Username found. Please Login!"}),400
         
         password = data["password"].encode("utf-8")
         hashed = bcrypt.hashpw(password, bcrypt.gensalt())
@@ -73,9 +73,9 @@ def signup():
 
         # Check the response
         if response_register.data:
-            return jsonify({"status": "Register Success"}, 200)
+            return jsonify({"status": "Success"}, 200)
         else:
-            return jsonify({"status": "Register Failed", "error": "Try again later"}),500
+            return jsonify({"status": "Failed", "error": "Try again later"}),500
 
     except Exception as e:
         return jsonify({"status": "Failed", "error": f"{str(e)}"}),500
@@ -102,7 +102,7 @@ def post_reservation():
             start_date = datetime.strptime(data["start_date"], "%Y-%m-%d").date()
             end_date = datetime.strptime(data["end_date"], "%Y-%m-%d").date()
         except ValueError:
-             return jsonify({"status": "Register Failed", "error": "Dates must be in YYYY-MM-DD format"}), 400
+             return jsonify({"status": "Failed", "error": "Dates must be in YYYY-MM-DD format"}), 400
 
         load_dotenv()
         SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -122,7 +122,7 @@ def post_reservation():
         if response.data:
             return jsonify({"status": "Success"}, 200)
         else:
-            return jsonify({"status": "Reservation Failed", "error": "Try again later"}),500
+            return jsonify({"status": "Failed", "error": "Try again later"}),500
 
     except Exception as e:
         return jsonify({"status": "Error", "error": f"{str(e)}"}),400
@@ -133,7 +133,7 @@ def get_key():
         data = request.get_json()
 
         if "property_id" not in data: 
-            return jsonify({"status": "Fetch Failed", "error": "Property ID is required"}), 400
+            return jsonify({"status": "Failed", "error": "Property ID is required"}), 400
 
         load_dotenv()
         SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -143,7 +143,7 @@ def get_key():
         response = supabase.table("Key").select("*").eq("id", data["property_id"]).execute()
         
         if not response.data:
-            return jsonify({"status": "Fetch Failed", "error": "No matching property ID found"}), 404
+            return jsonify({"status": "Failed", "error": "No matching property ID found"}), 404
         
         key_value = response.data[0].get("current_key")  # Adjust field name if different
 
@@ -166,7 +166,7 @@ def get_properties():
         response = supabase.table("Properties").select("*").execute()
         
         if not response.data: 
-            return jsonify({"status": "Fetch Failed", "error":"Failed to fetch key"})
+            return jsonify({"status": "Failed", "error":"Failed to fetch key"})
         else: 
             return jsonify({"status":"Success", "list":response.data})
     except Exception as e:
@@ -178,9 +178,9 @@ def login():
         data = request.get_json()
 
         if "user_name" not in data:
-            return jsonify({"status": "Login Failed", "error": "Username is required"}),200
+            return jsonify({"status": "Failed", "error": "Username is required"}),200
         if "password" not in data:
-            return jsonify({"status": "Login Failed", "error": "Password is required"}),200
+            return jsonify({"status": "Failed", "error": "Password is required"}),200
 
         # Check pass and user name in database
 
@@ -194,7 +194,7 @@ def login():
         response = supabase.table("User").select("*").eq("user_name", data["user_name"]).execute()
         
         if not response.data:
-            return jsonify({"status": "Login Failed", "error": "Username not found. Please register first!"}),200
+            return jsonify({"status": "Failed", "error": "Username not found. Please register first!"}),200
 
         if bcrypt.checkpw(data["password"].encode("utf-8"), response.data[0]["hashed_password"].encode("utf-8")) : 
 
@@ -204,7 +204,7 @@ def login():
             }), 200
 
         # TODO: Add last login session in database
-        return jsonify({"status": "Login Failed", "error": "Wrong password"}),200
+        return jsonify({"status": "Failed", "error": "Wrong password"}),200
     except Exception as e:
         return jsonify({"status": "Error", "error": f"{str(e)}"}),400
 
