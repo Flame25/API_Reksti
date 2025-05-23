@@ -196,7 +196,7 @@ def login():
 
         if bcrypt.checkpw(data["password"].encode("utf-8"), response.data[0]["hashed_password"].encode("utf-8")) : 
             username = data["user_name"]
-            response = supabase.table("Chat") \
+            response = supabase.table("User") \
             .select("*") \
             .or_(f"sender.eq.{username},receiver.eq.{username}") \
             .order("timestamp", desc=False) \
