@@ -95,7 +95,7 @@ def post_reservation():
         if "status" not in data:
             return jsonify({"status": "Failed", "error": "Reservation Status is required"}),400
         if "property_id" not in data:
-            return jsonify({"status": "Failed", "error": "Reservation Status is required"}),400
+            return jsonify({"status": "Failed", "error": "Property ID is required"}),400
 
         # Validate date format
         try:
