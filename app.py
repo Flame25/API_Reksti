@@ -86,8 +86,8 @@ def signup():
 def post_reservation():
     try:
         data = request.get_json()
-        if "user_id" not in data:
-            return jsonify({"status": "Register Failed", "error": "User ID is required"}),400
+        if "user_name" not in data:
+            return jsonify({"status": "Register Failed", "error": "User Name is required"}),400
         if "start_date" not in data: # Hash password in the back end for security
             return jsonify({"status": "Register Failed", "error": "Start Date is required"}),400
         if "end_date" not in data: # Hash password in the back end for security
@@ -109,7 +109,7 @@ def post_reservation():
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
         data_reservation = {
-            "user_id": data["user_id"], 
+            "user_name": data["user_name"], 
             "start_date": start_date.isoformat(), 
             "end_date": end_date.isoformat(), 
             "status": data["status"] 
