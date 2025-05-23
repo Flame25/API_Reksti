@@ -195,18 +195,10 @@ def login():
             return jsonify({"status": "Login Failed", "error": "Username not found. Please register first!"}),200
 
         if bcrypt.checkpw(data["password"].encode("utf-8"), response.data[0]["hashed_password"].encode("utf-8")) : 
-            username = data["user_name"]
-            response = supabase.table("User") \
-            .select("*") \
-            .or_(f"sender.eq.{username},receiver.eq.{username}") \
-            .order("timestamp", desc=False) \
-            .execute()
-
-            messages = response.data if response.data else []
 
             return jsonify({
-                "status": "Login Success",
-                "messages": messages
+                "status": "Success",
+                "desc": "Login Success",
             }), 200
 
         # TODO: Add last login session in database
